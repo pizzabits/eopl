@@ -1,0 +1,8 @@
+let expression was changed in the grammer [lines 41-43] of lang.scm, such that it gets an arbitrary number of (identifier = expression) between 'let' and 'in'.
+its interpretation was invented in lines 61-82 of interp.scm.
+
+
+To run and test, run top.scm using racket and evaluate:
+> (run "let x=30 in let x=-(x,1) y=-(x,2) in -(x,y)")
+(num-val 1)
+> 

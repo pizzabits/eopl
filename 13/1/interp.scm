@@ -58,25 +58,8 @@
               (value-of exp2 env)
               (value-of exp3 env))))
 
-        ; original definition of let-exp:
-        ;\commentbox{\ma{\theletspecsplit}}
-       ; (let-exp (var exp1 body)
-       ;          (eopl:printf "var: ~s\n" var)
-       ;          (eopl:printf "exp1: ~s\n" exp1)
-       ;          (eopl:printf "BODY: ~s\n" body)
-       ;   (let ((val1 (value-of exp1 env)))
-       ;     (value-of body
-       ;       (extend-env var val1 env))))
-    ;)
-  ;)
-   ; )
-        
         ; multiple variables and bodies let-exp:
         (let-exp (vars exps body)
-                ; (eopl:printf "VARS: ~s\n" vars)
-                ; (eopl:printf "EXPS: ~s\n" exps)
-                ; (eopl:printf "BODY: ~s\n" body)
-                ; (eopl:printf "EXT ENV: ~s\n" (extend-all vars exps env env))
                  (value-of body (extend-all vars exps env env)))
         )
       )

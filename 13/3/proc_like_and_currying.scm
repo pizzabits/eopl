@@ -1,6 +1,7 @@
 #lang eopl
 
-
+; the following code was made in order to think about how to implement 
+; the methods in PROC language before actually writing in PROC.
 
 ; sum using currying
 (define sum

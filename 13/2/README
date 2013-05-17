@@ -1,0 +1,8 @@
+let* expression was added to the grammer [lines 45-47] of lang.scm.
+its interpretation was invented in lines 68-84 of interp.scm.
+
+
+To run and test, run top.scm using racket and evaluate:
+> (run "let x=30 in let* x=-(x,1) y=-(x,2) in -(x,y)")
+(num-val 2)
+> 

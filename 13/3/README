@@ -1,16 +1,14 @@
-; uses PROC language definitions
+There's no change in PROC language.
+In order to run each example, open the top.scm using racket
+and evaluate:
 
-;3.a
-(run "let sum = proc(x)
+> (run "let sum = proc(x)
                   proc(y) 
                     -(x,-(0,y))
                        in ((sum 3) 4)")
 
-;3.b
-; 4 + 4 + 4 = 12
-
-;3.c
-(run "let mult = proc (maker)
+(num-val 7)
+> (run "let mult = proc (maker)
                     proc (number)
                       proc (multiplier)
                         if zero? (number)
@@ -23,3 +21,6 @@
                              then 1
                              else ((times ((maker maker) -(number,1))) number)
                in ((fact fact) 6)")
+
+(num-val 720)
+> 
