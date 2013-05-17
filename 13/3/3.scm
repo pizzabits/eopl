@@ -17,9 +17,9 @@
                         then 0
                         else -((((maker maker) -(number,1)) multiplier), -(0, multiplier))
         in let times = proc(x) proc(y) (((mult mult) x) y)
-           in let fact = proc (maker)
+           in let factorial = proc (maker)
                            proc (number)
                              if zero? (number)
                              then 1
                              else ((times ((maker maker) -(number,1))) number)
-               in ((fact fact) 6)")
+               in ((factorial factorial) 6)")
