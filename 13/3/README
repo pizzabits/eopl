@@ -1,4 +1,4 @@
-There's no change in PROC language.
+There're no changes in the PROC language.
 In order to run each example, open the top.scm using racket
 and evaluate:
 
