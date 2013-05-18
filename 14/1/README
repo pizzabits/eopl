@@ -1,0 +1,38 @@
+Extend PROC language such that procedures will get multiple arguments,
+and also procedure calls could be made with multiple arguments.
+
+Changes made to PROC language:
+
+lang.scm - in the grammer definition:
+proc expression now gets an arbitrary number of identifiers and an expression.
+call expression now gets an expression and an arbitrary number of expressions.
+
+interp.scm - call-exp now knows how to deal with multiple operands,
+since the procedure is applied on all of them (using the map transformation).
+
+in the procedure definition, the environment will now be extended with all of the
+vars and vals passed as parameters.
+this is done using a special method extend-all, which is documented in the source code.
+
+In order to run each example, open the top.scm using racket
+and evaluate:
+
+> (run "let makemult = proc (maker x)
+                        if zero? (x)
+                        then 0
+                        else -((maker maker -(x,1)), -4)
+        in let times4 = proc (x) (makemult makemult x)
+          in (times4 9)")
+(num-val 36)
+> (run "let mult = proc (maker number multiplier)
+                        if zero? (number)
+                        then 0
+                        else -((maker maker -(number,1) multiplier), -(0, multiplier))
+        in let times = proc(x y) (mult mult x y)
+           in let factorial = proc (maker number)
+                             if zero? (number)
+                             then 1
+                             else (times (maker maker -(number,1)) number)
+               in (factorial factorial 6)")
+(num-val 720)
+> 
