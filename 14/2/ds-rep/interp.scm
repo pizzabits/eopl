@@ -59,11 +59,8 @@
               (value-of exp2 env)
               (value-of exp3 env))))
 
-        ;\commentbox{\ma{\theletspecsplit}}
-        (let-exp (var exp1 body)       
-          (let ((val1 (value-of exp1 env)))
-            (value-of body
-              (extend-env var val1 env))))
+        (let-exp (vars exps body)
+                 (value-of body (extend-all vars exps env env)))
         
         (proc-exp (var body)
           (proc-val (procedure var body env)))
@@ -71,16 +68,33 @@
         (call-exp (rator rand)
           (let ((proc (expval->proc (value-of rator env)))
                 (arg (value-of rand env)))
-            (apply-procedure proc arg)))
+            (apply-procedure proc arg env)))
 
         )))
 
   ;; apply-procedure : Proc * ExpVal -> ExpVal
   ;; Page: 79
+  ;; Using dynamic binding, meaning that the environment used
+  ;; while evaluating the procedure isn't the procedure's saved-env,
+  ;; but the current environment. 
   (define apply-procedure
-    (lambda (proc1 val)
+    (lambda (proc1 val env)
       (cases proc proc1
         (procedure (var body saved-env)
-          (value-of body (extend-env var val saved-env))))))
-
+          (value-of body (extend-env var val env))))))
+  
+  (define extend-all
+    (lambda (vars exps oldenv newenv)
+      (if (and (pair? vars) (pair? exps) )
+          (extend-all 
+           (cdr vars) 
+           (cdr exps) 
+           oldenv 
+           (extended-env-record
+            (car vars)
+            (value-of (car exps) oldenv)
+            newenv))
+          newenv)
+          )
+      )
   )

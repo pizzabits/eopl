@@ -69,32 +69,40 @@
           (proc-val (procedure vars body env)))
 
         (call-exp (rator rands)
-                  ;(eopl:printf "call-exp rator= ~a\n" rator)
-                  ;(eopl:printf "call-exp rands= ~a\n" rands)
           (let ((proc (expval->proc (value-of rator env))))
-            ;(eopl:printf "mapped rands: ~a\n" (map (lambda (rand) (value-of rand env)) rands))
             (apply-procedure proc
                              (map (lambda (rand)
                                     (value-of rand env))
-                                  rands))
+                                  rands)
+                             )
             )
           )
-        )))
-
+        )
+      )
+    )
 
   ;; procedure : {Var}* * Exp * Env -> Proc
   (define procedure
     (lambda (vars body env)
       (lambda (vals)
-        ;(eopl:printf "procedure vars= ~a\nprocedure vals= ~a\n" vars vals)
+        (assert-param-count vars vals)
         (value-of body (extend-all vars vals env)))))
   
   ;; apply-procedure : Proc * {ExpVal}* -> ExpVal
   (define apply-procedure
     (lambda (proc vals)
-      ;(eopl:printf "apply-procedure proc= ~a\napply-procedure vals= ~a\n" proc vals)
       (proc vals)))
 
+  (define assert-param-count
+    (lambda (vars vals)
+      (if (pair? vars)
+          (if (pair? vals)
+              (assert-param-count (cdr vars) (cdr vals))
+              (eopl:error "Expected the same number of parameters in a procedure call!"))
+          )
+      )
+    )
+  
   ;; extend-all: extends the environment with multiple vars:vals,
   ;; such that each pair extends the recently-extended-environment,
   ;; so that extending parameters in a procedure is done like it was
