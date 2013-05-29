@@ -9,17 +9,19 @@
   (require "interp.scm")           ; for value-of-program
   (require "tests.scm")            ; for test-list
   
+  ;; since this is the top-level module, we don't really need to
+  ;; provide anything, but we do so just in case.  
+
   (provide run run-all)
   
   ;;;;;;;;;;;;;;;; interface to test harness ;;;;;;;;;;;;;;;;
   
-  ;; run : string -> expval
-
+  ;; run : String -> ExpVal
   (define run
     (lambda (string)
       (value-of-program (scan&parse string))))
   
-  ;; run-all : () -> unspecified
+  ;; run-all : () -> Unspecified
 
   ;; runs all the tests in test-list, comparing the results with
   ;; equal-answer?  
@@ -42,7 +44,7 @@
                      "Can't convert sloppy value to expval: ~s"
                      sloppy-val)))))
     
-  ;; run-one : symbol -> expval
+  ;; run-one : Sym -> ExpVal
 
   ;; (run-one sym) runs the test whose name is sym
   
@@ -58,3 +60,7 @@
    (run-all)
   
   )
+
+
+
+

@@ -6,6 +6,27 @@
   
   (define test-list
     '(
+      
+      ;; question 1 tests
+      (multiple-arguments-proc1 
+       "let makemult = proc (maker, x)
+                        if zero? (x)
+                        then 0
+                        else -((maker maker -(x,1)), -4)
+        in let times4 = proc (x) (makemult makemult x)
+          in (times4 9)" 36)
+      
+      (multiple-arguments-proc2
+       "let mult = proc (maker, number, multiplier)
+                        if zero? (number)
+                        then 0
+                        else -((maker maker -(number,1) multiplier), -(0, multiplier))
+        in let times = proc(x, y) (mult mult x y)
+           in let factorial = proc (maker, number)
+                             if zero? (number)
+                             then 1
+                             else (times (maker maker -(number,1)) number)
+               in (factorial factorial 6)" 720)
   
       ;; simple arithmetic
       (positive-const "11" 11)

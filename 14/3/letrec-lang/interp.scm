@@ -1,11 +1,8 @@
 (module interp (lib "eopl.ss" "eopl")
   
-  ;; interpreter for the PROC language, using the procedural
-  ;; representation of procedures.
-
-  ;; The \commentboxes are the latex code for inserting the rules into
-  ;; the code in the book. These are too complicated to put here, see
-  ;; the text, sorry. 
+  ;; interpreter for the LETREC language.  The \commentboxes are the
+  ;; latex code for inserting the rules into the code in the book.
+  ;; These are too complicated to put here, see the text, sorry.
 
   (require "drscheme-init.scm")
 
@@ -25,6 +22,7 @@
           (value-of exp1 (init-env))))))
 
   ;; value-of : Exp * Env -> ExpVal
+  ;; Page: 83
   (define value-of
     (lambda (exp env)
       (cases expression exp
@@ -60,8 +58,10 @@
               (value-of exp3 env))))
 
         ;\commentbox{\ma{\theletspecsplit}}
-        (let-exp (vars exps body)
-                 (value-of body (extend-all vars exps env env)))
+        (let-exp (var exp1 body)       
+          (let ((val1 (value-of exp1 env)))
+            (value-of body
+              (extend-env var val1 env))))
         
         (proc-exp (var body)
           (proc-val (procedure var body env)))
@@ -69,39 +69,19 @@
         (call-exp (rator rand)
           (let ((proc (expval->proc (value-of rator env)))
                 (arg (value-of rand env)))
-            (apply-procedure proc arg env)))
+            (apply-procedure proc arg)))
 
+        (letrec-exp (proc-names-lst bound-vars-lst proc-bodies-lst letrec-body)
+          (value-of letrec-body
+           (extend-env-rec proc-names-lst bound-vars-lst proc-bodies-lst env)))
+        
         )))
 
-
-  ;; procedure : Var * Exp * Env -> Proc
-  ;; Page: 79
-  (define procedure
-    (lambda (var body env)
-      (lambda (val newenv)
-        (value-of body (extend-env var val newenv)))))
-  
   ;; apply-procedure : Proc * ExpVal -> ExpVal
-  ;; Page: 79
-  ;; Using dynamic binding, meaning that the environment used
-  ;; while evaluating the procedure isn't the procedure's saved-env,
-  ;; but the current environment.
-  (define apply-procedure
-    (lambda (proc val newenv)
-      (proc val newenv)))
 
-  (define extend-all
-    (lambda (vars exps oldenv newenv)
-      (if (and (pair? vars) (pair? exps) )
-          (extend-all 
-           (cdr vars) 
-           (cdr exps) 
-           oldenv 
-           (extended-env-record
-            (car vars)
-            (value-of (car exps) oldenv)
-            newenv))
-          newenv)
-      )
-    )
+  (define apply-procedure
+    (lambda (proc1 arg)
+      (cases proc proc1
+        (procedure (var body saved-env)
+          (value-of body (extend-env var arg saved-env))))))
   )

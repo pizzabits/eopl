@@ -1,0 +1,59 @@
+Extend LETREC language to allow the declaration of any number
+of mutually recursive unary procedures, for example:
+
+	letrec
+	  even(x) = if zero?(x) then 1 else (odd -(x,1))
+	  odd(x) = if zero?(x) then 0 else (even -(x,1))
+	in (odd 13)
+
+Changes made to LETREC language:
+
+lang.scm - in the grammer definition of "letrec", lines 51-55:
+letrec expression now gets an arbitrary number of identifiers = an expression's.
+
+data-structures.scm - environmnet datatype, in case of an extend-env-rec, lines 66-70:
+all of the parameters other than the environment are now lists, 
+according to the change in the "letrec" grammar.
+
+environments.scm - apply-env definition, in case of an extend-env-rec, lines 41-66:
+trying to find the requested proc's name in the proc names list,
+using search-symbol-position-in-list, which returns the index where a requested
+name is found in a list or 'NaN in case it is not found.
+in case the proc was found, then we're already using an extended environment,
+provide the proc-val with that proc's parameters as arguments for the procedure method.
+
+interp.scm - in the value-of definition, in case of a letrec-exp, lines 74-98:
+letrec-exp extends the environment according to newly added variables.
+the procedure definition uses dynamically using the latest environment.
+
+
+In order to run tests, open top.scm and run.
+
+
+Examples of execution (not using tests) :
+
+> (run "letrec
+          even(x) = if zero?(x) then 1 else (odd -(x,1))
+          odd(x)  = if zero?(x) then 0 else (even -(x,1))
+        in (odd 13)")
+(num-val 1)
+> (run "letrec
+          is-zero(x) = if zero?(x) then 1 else 0
+          even(x) = if zero?(x) then 1 else (odd -(x,1))
+          odd(x)  = if zero?(x) then 0 else (even -(x,1))
+        in (is-zero 0)")
+
+(num-val 1)
+> (run "letrec
+          is-zero(x) = if zero?(x) then 1 else 0
+          even(x) = if zero?(x) then 1 else (odd -(x,1))
+          odd(x)  = if zero?(x) then 0 else (even -(x,1))
+        in (is-zero 1)")
+(num-val 0)
+> (run "letrec
+          is-zero(x) = if zero?(x) then 1 else 0
+          even(x) = if zero?(x) then 1 else (odd -(x,1))
+          odd(x)  = if zero?(x) then 0 else (even -(x,1))
+        in (even 12)")
+(num-val 1)
+> 

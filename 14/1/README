@@ -1,35 +1,41 @@
-Extend PROC language such that procedures will get multiple arguments,
-and also procedure calls could be made with multiple arguments.
+Extend PROC language to include procedures with multiple arguments
+and calls with multiple operands, as suggested by the grammar
+	Expression ::= proc ( {Identifier}*(,) ) Expression
+	Expression ::= (Expression {Expression}*)
 
 Changes made to PROC language:
 
-lang.scm - in the grammer definition:
-proc expression now gets an arbitrary number of identifiers and an expression.
+lang.scm - in the grammer definition, lines 43-49:
+proc expression now gets a separated by ',' list of identifiers and an expression.
 call expression now gets an expression and an arbitrary number of expressions.
 
-interp.scm - call-exp now knows how to deal with multiple operands,
-since the procedure is applied on all of them (using the map transformation).
+interp.scm - in the value-of definition, lines 68-120:
+call-exp now knows how to deal with multiple operands,
+since the procedure is applied to all of them, using the map transformation.
 
-in the procedure definition, the environment will now be extended with all of the
-vars and vals passed as parameters.
-this is done using a special method extend-all, which is documented in the source code.
+in the procedure definition, after asserting that the procedure got the expected number of parameters,
+the environment will be extended with all of the new bounded variables,
+done using extend-all, which is documented in the source code.
 
-In order to run each example, open the top.scm using racket
-and evaluate:
 
-> (run "let makemult = proc (maker x)
+In order to run tests, open top.scm and run.
+
+
+Examples of execution (not using tests) :
+
+> (run "let makemult = proc (maker, x)
                         if zero? (x)
                         then 0
                         else -((maker maker -(x,1)), -4)
         in let times4 = proc (x) (makemult makemult x)
           in (times4 9)")
 (num-val 36)
-> (run "let mult = proc (maker number multiplier)
+> (run "let mult = proc (maker, number, multiplier)
                         if zero? (number)
                         then 0
                         else -((maker maker -(number,1) multiplier), -(0, multiplier))
-        in let times = proc(x y) (mult mult x y)
-           in let factorial = proc (maker number)
+        in let times = proc(x, y) (mult mult x y)
+           in let factorial = proc (maker, number)
                              if zero? (number)
                              then 1
                              else (times (maker maker -(number,1)) number)

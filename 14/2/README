@@ -1,0 +1,36 @@
+Dynamic binding (or dynamic scoping) is an alternative design for procedures,
+in which the procedure body is evaluated in an environment obtained by extending
+the environment at a point of call.
+
+For example, in
+    let a = 3
+    in let p = proc (x) -(x,a)
+           a = 5
+       in -(a,(p 2))
+
+the a in the procedure body would be bound to 5, not 3.
+Modify PROC language to use dynamic binding, twice:
+Once using a procedural representation for procedures,
+and once using a data-structure representation.
+
+
+Changes made to PROC language:
+
+lang.scm - in the grammer definition, lines 39-41:
+let expression now gets an arbitrary number of identifiers and an expression.
+
+interp.scm - in the value-of definition, lines 63-107:
+let-exp extends the environment according to newly added variables.
+the procedure definition uses dynamically using the latest environment.
+
+
+In order to run tests, open top.scm and run.
+
+
+Examples of execution (not using tests) :
+
+> (run "let a=3
+        in let p=proc(x) -(x,a)
+               a=5
+           in -(a,(p 2))")
+(num-val 8)

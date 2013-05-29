@@ -6,14 +6,35 @@
   
   (define test-list
     '(
-      
-      ;; question 1.b - DS-representation test 
-      (dynamic-binding-proc
-       "let a=3
-        in let p=proc(x) -(x,a)
-               a=5
-           in -(a,(p 2))" 8)
   
+      ;; question 3 tests
+      (mutually-recursive-unary-procs
+       "letrec
+          even(x) = if zero?(x) then 1 else (odd -(x,1))
+          odd(x)  = if zero?(x) then 0 else (even -(x,1))
+        in (odd 13)" 1)
+      
+      (is-zero-or-even-odd1
+       "letrec
+          is-zero(x) = if zero?(x) then 1 else 0
+          even(x) = if zero?(x) then 1 else (odd -(x,1))
+          odd(x)  = if zero?(x) then 0 else (even -(x,1))
+        in (is-zero 0)" 1)
+      
+      (is-zero-or-even-odd2
+       "letrec
+          is-zero(x) = if zero?(x) then 1 else 0
+          even(x) = if zero?(x) then 1 else (odd -(x,1))
+          odd(x)  = if zero?(x) then 0 else (even -(x,1))
+        in (is-zero 1)" 0)
+      
+      (is-zero-or-even-odd3
+       "letrec
+          is-zero(x) = if zero?(x) then 1 else 0
+          even(x) = if zero?(x) then 1 else (odd -(x,1))
+          odd(x)  = if zero?(x) then 0 else (even -(x,1))
+        in (even 12)" 1)
+      
       ;; simple arithmetic
       (positive-const "11" 11)
       (negative-const "-33" -33)
@@ -67,5 +88,25 @@
       (apply-simple-proc "let f = proc (x) -(x,1) in (f 30)" 29)
       (let-to-proc-1 "(proc(f)(f 30)  proc(x)-(x,1))" 29)
 
+
+      (nested-procs "((proc (x) proc (y) -(x,y)  5) 6)" -1)
+      (nested-procs2 "let f = proc(x) proc (y) -(x,y) in ((f -(10,5)) 6)"
+        -1)
+      
+       (y-combinator-1 "
+let fix =  proc (f)
+            let d = proc (x) proc (z) ((f (x x)) z)
+            in proc (n) ((f (d d)) n)
+in let
+    t4m = proc (f) proc(x) if zero?(x) then 0 else -((f -(x,1)),-4)
+in let times4 = (fix t4m)
+   in (times4 3)" 12)
+      
+       ;; simple letrecs
+      (simple-letrec-1 "letrec f(x) = -(x,1) in (f 33)" 32)
+      (simple-letrec-2
+        "letrec f(x) = if zero?(x)  then 0 else -((f -(x,1)), -2) in (f 4)"
+        8)
+      
       ))
   )
