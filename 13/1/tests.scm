@@ -3,10 +3,23 @@
   (provide test-list)
 
   ;;;;;;;;;;;;;;;; tests ;;;;;;;;;;;;;;;;
-  
+
   (define test-list
     '(
   
+      ;; question 1 tests
+      (multiple-vars-let
+       "let x=10
+            y=20
+            z=10
+        in -(z, -(y, x))" 0)
+      
+      (multiple-vars-let-book-example
+       "let x=30
+        in let x=-(x,1)
+               y=-(x,2)
+        in -(x, y)" 1)
+      
       ;; simple arithmetic
       (positive-const "11" 11)
       (negative-const "-33" -33)

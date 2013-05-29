@@ -1,6 +1,8 @@
 There're no changes in the PROC language.
-In order to run each example, open the top.scm using racket
-and evaluate:
+In order to run tests, open the top.scm and run.
+
+
+Examples of execution (not using tests) :
 
 > (run "let sum = proc(x)
                   proc(y) 

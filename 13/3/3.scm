@@ -1,4 +1,6 @@
 ;; uses PROC language definitions
+;; these tests exists in the DS-representation implementation's,
+;; as well as in the procedures-representation implementation's tests.
 
 ;; 3.a
 (run "let sum = proc(x)

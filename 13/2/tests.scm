@@ -6,7 +6,14 @@
   
   (define test-list
     '(
-  
+      
+      ;; question 2 test
+      (multiple-vars-let*-book-example
+       "let x=30
+        in let* x=-(x,1)
+                y=-(x,2)
+        in -(x, y)" 2)
+      
       ;; simple arithmetic
       (positive-const "11" 11)
       (negative-const "-33" -33)

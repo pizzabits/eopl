@@ -6,7 +6,30 @@
   
   (define test-list
     '(
-  
+      
+      ;; question 3.a test
+      (currying-proc
+       "let sum = proc(x)
+                  proc(y) 
+                    -(x,-(0,y))
+                       in ((sum 3) 4)" 7)
+      
+      ;; question 3.c test
+      (factorial-currying-inner-proc
+       "let mult = proc (maker)
+                    proc (number)
+                      proc (multiplier)
+                        if zero? (number)
+                        then 0
+                        else -((((maker maker) -(number,1)) multiplier), -(0, multiplier))
+        in let times = proc(x) proc(y) (((mult mult) x) y)
+           in let factorial = proc (maker)
+                           proc (number)
+                             if zero? (number)
+                             then 1
+                             else ((times ((maker maker) -(number,1))) number)
+               in ((factorial factorial) 6)" 720)
+      
       ;; simple arithmetic
       (positive-const "11" 11)
       (negative-const "-33" -33)
