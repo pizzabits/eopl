@@ -26,9 +26,7 @@ interp.scm - in the value-of definition, in case of a letrec-exp, lines 74-98:
 letrec-exp extends the environment according to newly added variables.
 the procedure definition uses dynamically using the latest environment.
 
-
 In order to run tests, open top.scm and run.
-
 
 Examples of execution (not using tests) :
 

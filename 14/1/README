@@ -20,7 +20,6 @@ done using extend-all, which is documented in the source code.
 
 In order to run tests, open top.scm and run.
 
-
 Examples of execution (not using tests) :
 
 > (run "let makemult = proc (maker, x)
