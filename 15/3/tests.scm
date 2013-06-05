@@ -5,25 +5,40 @@
   
   (define test-list
     '(
+
+      ;; question 3 tests
+      (fibonacci1 "let fib = 0
+        in begin
+              set fib = proc (n)
+                         if zero?(n)
+                         then 1
+                         else if zero?(-(n, 1))
+                              then 1
+                              else -((fib -(n, 1)) , -(0, (fib -(n, 2))));
+              (fib 1)
+           end" 1)
+        
+      (fibonacci6 "let fib = 0
+        in begin
+              set fib = proc (n)
+                         if zero?(n)
+                         then 1
+                         else if zero?(-(n, 1))
+                              then 1
+                              else -((fib -(n, 1)) , -(0, (fib -(n, 2))));
+              (fib 6)
+           end" 13)
       
-      (list-test
-       "list(0)" (list-val (num-val 0)))
-      
-      ;; question 1 tests
-      (test-listval-with-inner-ref
-       "let x=newref(0)
-        in list(
-                let x=newref(0) in
-                   begin
-                     setref(x, -(deref(x),888));
-                     deref(x)
-                   end,
-                -(deref(x), -1), deref(x))"
-      (list-val -888 1 0))
-                      
-      (test-listval-with-refs
-       "let x=newref(0)
-        in list(-(deref(x),1), -(deref(x), -1), deref(x))" -1 1 0)
+      (fibonacci10 "let fib = 0
+        in begin
+              set fib = proc (n)
+                         if zero?(n)
+                         then 1
+                         else if zero?(-(n, 1))
+                              then 1
+                              else -((fib -(n, 1)) , -(0, (fib -(n, 2))));
+              (fib 10)
+           end" 89)
       
       ;; simple arithmetic
       (positive-const "11" 11)
@@ -118,65 +133,38 @@ in let times4 = (fix t4m)
         "begin 1; 2; 3 end"
         3)
 
-      (gensym-test-1 
-"let g = let counter = newref(0) 
-         in proc (dummy) let d = setref(counter, -(deref(counter),-1))
-                    in deref(counter)
-in -((g 11),(g 22))"
-       -1)
+      ;; extremely primitive testing for mutable variables
 
-      (simple-store-test-1 "let x = newref(17) in deref(x)" 17)
-
-      (assignment-test-1 "let x = newref(17) 
-                          in begin setref(x,27); deref(x) end"
+      (assignment-test-1 "let x = 17
+                          in begin set x = 27; x end"
         27)
 
-      (gensym-test-2 
-"let g = let counter = newref(0) 
-         in proc (dummy) begin
-                           setref(counter, -(deref(counter),-1));
-                           deref(counter)
-                         end
- in -((g 11),(g 22))"
-       -1)
 
-     (even-odd-via-set-1 "
-let x = newref(0)
-in letrec even(d) = if zero?(deref(x)) 
-                   then 1
-                   else let d = setref(x, -(deref(x),1))
-                        in (odd d)
-          odd(d)  = if zero?(deref(x)) 
-                   then 0
-                   else let d = setref(x, -(deref(x),1))
-                        in (even d)
-   in let d = setref(x,13) in (odd -100)" 1)
+      (gensym-test
+"let g = let count = 0 in proc(d) 
+                        let d = set count = -(count,-1)
+                        in count
+in -((g 11), (g 22))"
+-1)
 
- (even-odd-via-set-1 "
-let x = newref(0)
-in letrec even(d) = if zero?(deref(x)) 
-                   then 1
-                   else let d = setref(x, -(deref(x),1))
-                        in (odd d)
-          odd(d)  = if zero?(deref(x)) 
-                   then 0
-                   else let d = setref(x, -(deref(x),1))
-                        in (even d)
-   in let d = setref(x,13) in (odd -100)" 1)
+      (even-odd-via-set "
+let x = 0
+in letrec even(d) = if zero?(x) then 1 
+                                  else let d = set x = -(x,1)
+                                       in (odd d)
+              odd(d)  = if zero?(x) then 0 
+                                  else let d = set x = -(x,1)
+                                       in (even d)
+   in let d = set x = 13 in (odd -99)" 1)
 
- (show-allocation-1 "
-let x = newref(22)
-in let f = proc (z) let zz = newref(-(z,deref(x))) in deref(zz)
-   in -((f 66), (f 55))"
-   11)
-
- (chains-1 "
-let x = newref(newref(0))
-in begin 
-    setref(deref(x), 11);
-    deref(deref(x))
-   end"
-   11)
+      (example-for-book-1 "
+let f = proc (x) proc (y) 
+                  begin
+                   set x = -(x,-1);
+                   -(x,y)
+                  end
+in ((f 44) 33)"
+	12)
       
       ))
   )

@@ -1,6 +1,6 @@
 (module interp (lib "eopl.ss" "eopl")
   
-  ;; interpreter for the EXPLICIT-REFS language
+  ;; interpreter for the IMPLICIT-REFS language
 
   (require "drscheme-init.scm")
 
@@ -21,16 +21,15 @@
 ;;;;;;;;;;;;;;;; the interpreter ;;;;;;;;;;;;;;;;
 
   ;; value-of-program : Program -> ExpVal
-  ;; Page: 110
   (define value-of-program 
     (lambda (pgm)
-      (initialize-store!)               ; new for explicit refs.
+      (initialize-store!)
       (cases program pgm
         (a-program (exp1)
           (value-of exp1 (init-env))))))
 
   ;; value-of : Exp * Env -> ExpVal
-  ;; Page: 113
+  ;; Page: 118, 119
   (define value-of
     (lambda (exp env)
       (cases expression exp
@@ -38,8 +37,9 @@
         ;\commentbox{ (value-of (const-exp \n{}) \r) = \n{}}
         (const-exp (num) (num-val num))
 
-        ;\commentbox{ (value-of (var-exp \x{}) \r) = (apply-env \r \x{})}
-        (var-exp (var) (apply-env env var))
+        ;\commentbox{ (value-of (var-exp \x{}) \r) 
+        ;              = (deref (apply-env \r \x{}))}
+        (var-exp (var) (deref (apply-env env var)))
 
         ;\commentbox{\diffspec}
         (diff-exp (exp1 exp2)
@@ -49,7 +49,7 @@
                   (num2 (expval->num val2)))
               (num-val
                 (- num1 num2)))))
-      
+
         ;\commentbox{\zerotestspec}
         (zero?-exp (exp1)
           (let ((val1 (value-of exp1 env)))
@@ -67,9 +67,9 @@
 
         ;\commentbox{\ma{\theletspecsplit}}
         (let-exp (var exp1 body)       
-          (let ((val1 (value-of exp1 env)))
+          (let ((v1 (value-of exp1 env)))
             (value-of body
-              (extend-env var val1 env))))
+              (extend-env var (newref v1) env))))
         
         (proc-exp (var body)
           (proc-val (procedure var body env)))
@@ -93,59 +93,44 @@
                      (value-of-begins (car es) (cdr es)))))))
             (value-of-begins exp1 exps)))
 
-        (newref-exp (exp1)
-          (let ((v1 (value-of exp1 env)))
-            (ref-val (newref v1))))
+        (assign-exp (var exp1)
+          (begin
+            (setref!
+              (apply-env env var)
+              (value-of exp1 env))
+            (num-val 27)))
 
-        (deref-exp (exp1)
-          (let ((v1 (value-of exp1 env)))
-            (let ((ref1 (expval->ref v1)))
-              (deref ref1))))
-
-        (setref-exp (exp1 exp2)
-          (let ((ref (expval->ref (value-of exp1 env))))
-            (let ((v2 (value-of exp2 env)))
-              (begin
-                (setref! ref v2)
-                (num-val 23)))))
-        
-        (list-exp (expressions)
-                  (list-val
-                  (map
-                   (lambda (expression)
-                     (value-of expression env))
-                   expressions))
-                  )
-        
         )))
 
-  ;; apply-procedure : Proc * ExpVal -> ExpVal
-  ;; 
-  ;; uninstrumented version
-  ;;   (define apply-procedure
-  ;;    (lambda (proc1 arg)
-  ;;      (cases proc proc1
-  ;;        (procedure (bvar body saved-env)
-  ;;          (value-of body (extend-env bvar arg saved-env))))))
 
+  ;; apply-procedure : Proc * ExpVal -> ExpVal
+  ;; Page: 119
+
+  ;; uninstrumented version
+  ;;  (define apply-procedure
+  ;;    (lambda (proc1 val)
+  ;;      (cases proc proc1
+  ;;        (procedure (var body saved-env)
+  ;;          (value-of body
+  ;;            (extend-env var (newref val) saved-env))))))
+  
   ;; instrumented version
   (define apply-procedure
     (lambda (proc1 arg)
       (cases proc proc1
         (procedure (var body saved-env)
-	  (let ((r arg))
-	    (let ((new-env (extend-env var r saved-env)))
-	      (if (instrument-let)
-		(begin
-		  (eopl:printf
-		    "entering body of proc ~s with env =~%"
-		    var)
-		  (pretty-print (env->list new-env))
+          (let ((r (newref arg)))
+            (let ((new-env (extend-env var r saved-env)))
+              (if (instrument-let)
+                (begin
+                  (eopl:printf
+                    "entering body of proc ~s with env =~%"
+                    var)
+                  (pretty-print (env->list new-env)) 
                   (eopl:printf "store =~%")
                   (pretty-print (store->readable (get-store-as-list)))
                   (eopl:printf "~%")))
-              (value-of body new-env)))))))
-
+              (value-of body new-env)))))))  
 
   ;; store->readable : Listof(List(Ref,Expval)) 
   ;;                    -> Listof(List(Ref,Something-Readable))
@@ -153,11 +138,11 @@
     (lambda (l)
       (map
         (lambda (p)
-          (cons
+          (list
             (car p)
             (expval->printable (cadr p))))
         l)))
- 
+
   )
   
 

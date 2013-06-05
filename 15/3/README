@@ -1,0 +1,5 @@
+With Exercise 4.16 from page 121 in mind, write a program in IMPLICIT-REFS language
+that calculates the nth Fibonacci number, without using 'letrec',
+but instead, use the assigning operation.
+
+To run tests, open top.scm and run.
