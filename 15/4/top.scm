@@ -30,7 +30,6 @@
   
   (define equal-answer?
     (lambda (ans correct-ans)
-      (eopl:printf "answer: ~a\ncorrect answer: ~a\n" ans (sloppy->expval correct-ans))
       (equal? ans (sloppy->expval correct-ans))))
   
   (define sloppy->expval 
@@ -38,16 +37,13 @@
       (cond
         ((number? sloppy-val) (num-val sloppy-val))
         ((boolean? sloppy-val) (bool-val sloppy-val))
-        ((list? sloppy-val) (list-val sloppy-val))
         (else
          (eopl:error 'sloppy->expval 
                      "Can't convert sloppy value to expval: ~s"
                      sloppy-val)))))
     
   ;; run-one : Sym -> ExpVal
-
   ;; (run-one sym) runs the test whose name is sym
-  
   (define run-one
     (lambda (test-name)
       (let ((the-test (assoc test-name test-list)))
@@ -57,7 +53,7 @@
                 (run (cadr test))))
           (else (eopl:error 'run-one "no such test: ~s" test-name))))))
  
-   (run-all)
+  ;; (run-all)
   
   )
 

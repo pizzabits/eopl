@@ -1,0 +1,81 @@
+Exercise 4.22: So far our languages have been expression-oriented:
+the primary syntactic category of interest has been expressions
+and we have primarily been interested in their values.
+Extend IMPLICIT-REFS's language to model the simple statement-oriented
+language whose specification is sketched in pages 122-123.
+
+Be sure to follow the Grammar by writing separate procedures to handle programs,
+statements, and expressions.
+
+*******************
+* Running results *
+*******************
+
+Declaring, assigning and then printing variables:
+
+(run
+   "var x,y;
+    {
+       x = 3;
+       y = 1;
+       print x;
+       print y
+    }")
+#(struct:num-val 3)
+#(struct:num-val 1)
+
+
+
+Declaring, assigning and then printing initialized and uninitialized variables:
+
+(run
+   "var x,y;
+    {
+       x = 3;
+       
+       print x;
+       print y
+    }")
+#(struct:num-val 3)
+#(struct:num-val 888)
+
+
+% Example 1 from the book:
+
+(run "var x,y; {x = 3; y = 4; print +(x,y)}")
+#(struct:num-val 7)
+
+
+% Example 3 from the book:
+
+(run
+   "var x;
+    {
+        x = 3;
+        print x;
+        var x;
+        {
+           x = 4;
+           print x
+        };
+        print x
+    }"
+   )
+#(struct:num-val 3)
+#(struct:num-val 4)
+#(struct:num-val 3)
+
+
+Similar to Example 4 from the book:
+illustrates the interaction between statements and expressions.
+
+(run
+   "var f,x;
+    {
+       f = proc(x) 
+          -(x,5);
+       x = 3;
+       print (f x)
+    }"
+   )
+#(struct:num-val -2)
