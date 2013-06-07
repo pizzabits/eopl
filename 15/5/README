@@ -1,0 +1,28 @@
+Exercise 4.29: Add arrays to this language. Introduce new operators newarray,
+arrayref, and arrayset that create, dereference, and update arrays.
+
+This leads to
+	ArrVal = (Ref(ExpVal))?
+	ExpVal = Int+Bool+Proc+ArrVal
+	DenVal = Ref(ExpVal)
+
+Running examples:
+
+(run 
+  "let a = newarray(2,-99)
+      in 
+        begin
+            arrayset(a,1,0);
+            arrayref(a,1)
+        end")
+(const-exp 0)
+
+(run 
+  "let a = newarray(2,-99)
+      in
+        begin
+            arrayset(a,1,0);
+            arrayref(a,1);
+            arrayref(a,0)
+        end")
+(const-exp -99)
