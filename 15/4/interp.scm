@@ -41,13 +41,12 @@
                                (value-of-exp exp env))))
         
         (print-statement (exp)
-                         (eopl:printf "~a\n" (value-of-exp exp env)))
+                         (eopl:printf "~a\n" (expval->num (value-of-exp exp env))))
         
         (block-statement (statements)
                          (if (pair? statements)
                              (execute-anything-within-block-of statements env)
-                             (eopl:printf "Darn!"))
-                         )
+                             (eopl:printf "Darn!")))
         
         (if-statement (exp sta1 sta2)
                       (if (value-of-sta sta1 env)
@@ -55,35 +54,48 @@
                           (value-of-sta sta2 env)))
         
         (while-statement (exp sta)
-                         (if (value-of-exp exp env)
-                             (begin
-                               (value-of-sta sta env)
-                               (while-statement exp sta))
-                             23))
+                         (while-statement-helper exp sta env))
         
         (var-statement (vars body-statement)
                        (if (pair? vars)
-                           (extend-vars-exec-statement vars body-statement env)
+                           (var-statement-helper vars body-statement env)
                            (eopl:error "Define at least one var!")))
         )
       ))
   
+  (define while-statement-helper
+    (lambda (exp sta env)
+      (let ((result (value-of-exp exp env)))
+        (if (instrument-let)
+            (eopl:printf "expression '~a' result: '~a'\n" exp result))
+        (if result
+            (begin
+              (value-of-sta sta env)
+              (while-statement-helper exp sta env)))
+        )
+      )
+    )
+
   (define execute-anything-within-block-of
     (lambda (statements env)
       (if (pair? statements)
           (begin
              (value-of-sta (car statements) env)
-             (execute-anything-within-block-of (cdr statements) env)
-             ))))
+             (execute-anything-within-block-of (cdr statements) env))
+          )
+      )
+    )
   
-  (define extend-vars-exec-statement
+  (define var-statement-helper
     (lambda (vars body-statement env)
       (if (pair? vars)
-          (extend-vars-exec-statement
+          (var-statement-helper
              (cdr vars)
              body-statement
              (extend-env (car vars) (newref (num-val 888)) env))
-          (value-of-sta body-statement env))))
+          (value-of-sta body-statement env))
+      )
+    )
       
   ;; value-of : Exp * Env -> ExpVal
   ;; Page: 113
@@ -115,6 +127,14 @@
                      (num-val
                       (+ num1 num2)))))
 
+        (not-exp (exp)
+                 (let ((result (expval->bool (value-of-exp exp env))))
+                   (if (instrument-let)
+                       (eopl:printf "expression '~a' result: '~a'\n" exp result))
+                   (if result
+                       #f
+                       #t)))
+        
         ;\commentbox{\zerotestspec}
         (zero?-exp (exp1)
           (let ((val1 (value-of-exp exp1 env)))

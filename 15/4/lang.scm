@@ -55,6 +55,10 @@
        add-exp)
       
       (expression
+        ("not" "(" expression ")" )
+        not-exp)
+      
+      (expression
        ("zero?" "(" expression ")")
        zero?-exp)
 
