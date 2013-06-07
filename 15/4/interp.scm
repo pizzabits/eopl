@@ -49,9 +49,12 @@
                              (eopl:printf "Darn!")))
         
         (if-statement (exp sta1 sta2)
-                      (if (value-of-sta sta1 env)
-                          (value-of-sta sta1 env)
-                          (value-of-sta sta2 env)))
+                      (let ((result (expval->bool (value-of-exp exp env))))
+                        (if (instrument-let)
+                            (eopl:printf "expression '~a' result: '~a'\n" exp result))
+                        (if result
+                            (value-of-sta sta1 env)
+                            (value-of-sta sta2 env))))
         
         (while-statement (exp sta)
                          (while-statement-helper exp sta env))

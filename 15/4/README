@@ -12,7 +12,6 @@ statements, and expressions.
 *******************
 
 Declaring, assigning and then printing variables:
-
 (run
    "var x,y;
     {
@@ -25,7 +24,6 @@ Declaring, assigning and then printing variables:
 1
 
 Declaring, assigning and then printing initialized and uninitialized variables:
-
 (run
    "var x,y;
     {
@@ -38,8 +36,43 @@ Declaring, assigning and then printing initialized and uninitialized variables:
 888
 
 
-Example 1:
+Using if statement with blocks:
+(run
+   "var x, y;
+    {
+       x = 3;
+       y = 4;
+      
+       if zero?(x)
+       {
+          print y
+       }
+       {
+          print x
+       };
+       
+       print +(x,y)
+    }")
+3
+7
 
+without blocks:
+(run
+   "var x, y;
+    {
+       x = 3;
+       y = 4;
+      
+       if zero?(x)
+          print y
+          print x;
+       
+       print +(x,y)
+    }")
+3
+7
+
+Example 1:
 (run
    "var x, y;
     {
@@ -52,7 +85,6 @@ Example 1:
 
 
 Example 2:
-
 (run
    "var x,y,z; 
     { 
@@ -70,7 +102,6 @@ Example 2:
 
 
 Example 3:
-
 (run
    "var x;
     {
@@ -90,7 +121,6 @@ Example 3:
 
 
 Similar to Example 4:
-
 (run
    "var f,x;
     {
