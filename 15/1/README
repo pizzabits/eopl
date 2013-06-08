@@ -15,4 +15,21 @@ a. Write an algebric definition for the list operation, similar to the definitio
 
 b. Extend the language accordingly.
 
-   To test, open run.scm and run.
+Running examples:
+
+(run
+   "let x=newref(0)
+        in list(
+                let x=newref(0) in
+                   begin
+                     setref(x, -(deref(x),888));
+                     deref(x)
+                   end,
+                -(deref(x), -1), deref(x))")
+(list-val (list (num-val -888) (num-val 1) (num-val 0)))
+
+
+(run 
+   "let x=newref(0)
+        in list(-(deref(x),1), -(deref(x), -1), deref(x))")
+(list-val (list (num-val -1) (num-val 1) (num-val 0)))
