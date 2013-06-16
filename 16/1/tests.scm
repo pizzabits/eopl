@@ -6,26 +6,6 @@
   (define tests-for-run
     '(
 
-      ;; Exercise 7.5 tests
-      (multiple-letrec-multiple-arguments-proc
-           "letrec 
-                 int f(x : int, y : int, z : int) = 1
-                 bool is_zero(a : int, b : int) = zero?(a)
-                      in (is_zero (f 80 20 10) 1)" bool)
-      
-      (proc-multiple-args-in-let 
-              "let f = proc(x : int, y : int, z: int)
-                           proc (y : int) 
-                             -(x,-(y, z)) 
-               in (f 1 2 3)" ((int) -> int))
-      
-      (multiple-let-proc-multiple-args 
-       "let f1 = proc(x : int, y : int, z: int)
-                      -(x, z)
-            f2 = proc (y : int)
-                      -(y, 30)
-          in (f1 (f2 1) 2 3)" int)
-      
       ;; simple arithmetic
       (positive-const "11" 11)
       (negative-const "-33" -33)
@@ -121,6 +101,28 @@ in let times4 = (fix t4m)
     '(
       ;; tests from run-tests:
   
+      ;; Exercise 7.5 CHECKS
+      (letrec-multiple-declarations-proc-multiple-args
+       "letrec 
+           int f(x : int, y : int, z : int) = 1
+           bool is_zero(a : int, b : int) = zero?(a)
+        in (is_zero (f 80 20 10) 1)" bool)
+      
+      (let-proc-multiple-args
+       "let
+            f = proc(x : int, y : int, z: int)
+                  proc (y : int) 
+                      -(x,-(y, z)) 
+        in (f 1 2 3)" ((int) -> int))
+
+      (let-multiple-declarations-proc-multiple-args
+       "let 
+            f1 = proc(x : int, y : int, z: int)
+                     -(x, z)
+            f2 = proc (y : int)
+                     -(y, 30)
+        in (f1 (f2 1) 2 3)" int)
+      
       ;; simple arithmetic
       (positive-const "11" int)
       (negative-const "-33" int)

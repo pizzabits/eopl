@@ -16,7 +16,6 @@
   ;; Page: 243
   (define report-unequal-types
     (lambda (ty1 ty2 exp)
-      (eopl:printf "type1 = ~a\ntype2 = ~a\nexp = ~a\n" ty1 ty2 exp)
       (eopl:error 'check-equal-type!  
           "Types didn't match: ~s != ~a in~%~a"
           (type-to-external-form ty1)
@@ -46,7 +45,6 @@
 
         ;; \commentbox{\diffrule}
         (diff-exp (exp1 exp2)
-                  ;;(eopl:printf "env: ~a\n" tenv)
           (let ((ty1 (type-of exp1 tenv))
                 (ty2 (type-of exp2 tenv)))
             (check-equal-type! ty1 (int-type) exp1)
@@ -74,18 +72,13 @@
                  (let ((exp-types (map (lambda (expression)
                                          (type-of expression tenv))
                                        exps)))
-                   ;;(eopl:printf "body: ~a\n" body)
-                   (type-of body (extend-all vars exp-types tenv))))
+                   (let ((vars-extended-tenv
+                          (foldr2 extend-tenv tenv vars exp-types)))
+                     (type-of body vars-extended-tenv))))
 
         ;; \commentbox{\procrulechurch}
         (proc-exp (vars var-types body)
-                  ;;(eopl:printf "vars: ~a\nvar-types: ~a\nbody: ~a\n" vars var-types body)
-          (let ((result-type
-                  (type-of body
-                           (extend-all vars var-types tenv))))
-            ;;(eopl:printf "type of body is ~a" result-type)
-                    ;;(extend-tenv vars var-types tenv))))
-            (proc-type var-types result-type)))
+                  (proc-type var-types (type-of body (foldr2 extend-tenv tenv vars var-types))))
 
         ;; \commentbox{\apprule}
         (call-exp (rator rands)
@@ -93,7 +86,6 @@
                 (rand-types (map (lambda (rand)
                                    (type-of rand tenv))
                                  rands)))
-           ;; (eopl:printf "rator-type ~a\nrand-types ~a\n" rator-type rand-types)
             (cases type rator-type
               (proc-type (arg-types result-type)
                 (begin
@@ -105,56 +97,42 @@
         ;; \commentbox{\letrecrule}
         (letrec-exp (proc-result-types proc-names bound-vars-lists bound-vars-type-lists proc-bodies
                       letrec-body)
-                  ;;  (eopl:printf "proc-result-types: ~a\nproc-names: ~a\nbound-vars-lists: ~a\nbound-var-types-lists: ~a\n"
-                  ;;               proc-result-types             proc-names          bound-vars-lists       bound-vars-type-lists)
-          (let ((tenv-for-letrec-body                                     
-                 (extend-procs proc-names bound-vars-type-lists proc-result-types tenv)))
-            (let ((proc-body-types
-                   (map
-                     (lambda (proc-body bound-vars bound-vars-types)
-                       (type-of proc-body 
-                                (extend-all bound-vars bound-vars-types tenv-for-letrec-body)))
-                     proc-bodies bound-vars-lists bound-vars-type-lists)))
-              (for-each 
-                (lambda (proc-body-type proc-result-type proc-body)
-                 ;; (eopl:printf "proc-body-type: ~a\nproc-result-type: ~a\nproc-body: ~a\n" proc-body-type proc-result-type proc-body)
-                  (check-equal-type! proc-body-type proc-result-type proc-body))
-                proc-body-types proc-result-types proc-bodies)
-             ;; (eopl:printf "proc returns expected type.\ncontinue to check the type of letrec-body ~a\n" letrec-body)
-              
-              (type-of letrec-body tenv-for-letrec-body)))))))
-          
-  (define extend-procs
-    (lambda (proc-names bound-vars-type-lists proc-result-types told-env)
-       (if (null? proc-names)
-           told-env
-           (extend-procs (cdr proc-names) (cdr bound-vars-type-lists) (cdr proc-result-types)
-                         (extend-tenv (car proc-names)
-                                      (proc-type (car bound-vars-type-lists) (car proc-result-types))
-                                      told-env)
-     ))))
+                    (let ((proc-types (map (lambda (bound-var-types proc-result-type)
+                                             (proc-type bound-var-types proc-result-type))
+                                           bound-vars-type-lists proc-result-types)))
+                      (let ((tenv-for-letrec-body
+                             (foldr2 extend-tenv tenv proc-names proc-types)))
+                        (let ((proc-body-types
+                               (map
+                                (lambda (proc-body bound-vars bound-vars-types)
+                                  (type-of proc-body
+                                           (foldr2 extend-tenv tenv-for-letrec-body bound-vars bound-vars-types)))
+                                proc-bodies bound-vars-lists bound-vars-type-lists)))
+                          (for-each 
+                           (lambda (proc-body-type proc-result-type proc-body)
+                             (check-equal-type! proc-body-type proc-result-type proc-body))
+                           proc-body-types proc-result-types proc-bodies)
+                          (type-of letrec-body tenv-for-letrec-body)))))
+        )))
   
-  (define extend-all
-    (lambda (vars var-types told-env)
-      (if (pair? vars)
-          (extend-all (cdr vars) (cdr var-types)
-                      (extend-tenv (car vars) (car var-types) told-env))
-          told-env)))
-  
-;;  (define extend-procs2
-;;    (lambda (proc-names bound-vars-type-lists proc-result-types old-env)
-;;      (foldr 
-;;       (lambda (proc-names bound-vars-type-lists proc-result-types old-env)
-;;          (extend-tenv (car proc-names)
-;;                       (proc-type (car bound-vars-type-lists) (car proc-result-types))))
-;;        old-env
-        
-
+  ;; Helper procedures - I LOVE FOLDR
   (define foldr
     (lambda (func accumulated lst)
       (if (null? lst)
           accumulated
           (func (car lst) (foldr func accumulated (cdr lst))))))
+  
+  (define foldr2
+    (lambda (func accumulated lst1 lst2)
+      (if (or (null? lst1) (null? lst2))
+          accumulated
+          (func (car lst1) (car lst2) (foldr2 func accumulated (cdr lst1) (cdr lst2))))))
+  
+  (define foldr3
+    (lambda (func accumulated lst1 lst2 lst3)
+      (if (or (null? lst1) (null? lst2) (null? lst3))
+          accumulated
+          (func (car lst1) (car lst2) (car lst3) (foldr3 func accumulated (cdr lst1) (cdr lst2) (cdr lst3))))))
   
   (define report-rator-not-a-proc-type
     (lambda (rator-type rator)
