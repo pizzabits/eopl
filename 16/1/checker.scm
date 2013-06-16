@@ -68,13 +68,14 @@
 
         ;; for example: let y = -(x,1) in -(x,y)"
         ;; \commentbox{\letrule}
-        (let-exp (vars exps body)  ;; for example:  vars {y}, exps {-(x,1)}, body {-(x,y)}
-                 (let ((exp-types (map (lambda (expression)
-                                         (type-of expression tenv))
-                                       exps)))
-                   (let ((vars-extended-tenv
-                          (foldr2 extend-tenv tenv vars exp-types)))
-                     (type-of body vars-extended-tenv))))
+        (let-exp       ;; for example:  vars {y}, exps {-(x,1)}, body {-(x,y)}
+         (vars exps body) 
+           (let ((exp-types (map (lambda (expression)
+                                   (type-of expression tenv))
+                                 exps)))
+             (let ((vars-extended-tenv
+                    (foldr2 extend-tenv tenv vars exp-types)))
+               (type-of body vars-extended-tenv))))
 
         ;; \commentbox{\procrulechurch}
         (proc-exp (vars var-types body)
@@ -95,24 +96,23 @@
                 (report-rator-not-a-proc-type rator-type rator)))))
 
         ;; \commentbox{\letrecrule}
-        (letrec-exp (proc-result-types proc-names bound-vars-lists bound-vars-type-lists proc-bodies
-                      letrec-body)
-                    (let ((proc-types (map (lambda (bound-var-types proc-result-type)
-                                             (proc-type bound-var-types proc-result-type))
-                                           bound-vars-type-lists proc-result-types)))
-                      (let ((tenv-for-letrec-body
-                             (foldr2 extend-tenv tenv proc-names proc-types)))
-                        (let ((proc-body-types
-                               (map
-                                (lambda (proc-body bound-vars bound-vars-types)
-                                  (type-of proc-body
-                                           (foldr2 extend-tenv tenv-for-letrec-body bound-vars bound-vars-types)))
-                                proc-bodies bound-vars-lists bound-vars-type-lists)))
-                          (for-each 
-                           (lambda (proc-body-type proc-result-type proc-body)
+        (letrec-exp 
+         (proc-result-types proc-names bound-vars-lists bound-vars-type-lists proc-bodies 
+                            letrec-body)
+           (let ((proc-types (map (lambda (bound-var-types proc-result-type)
+                                    (proc-type bound-var-types proc-result-type))
+                                  bound-vars-type-lists proc-result-types)))
+             (let ((tenv-for-letrec-body
+                    (foldr2 extend-tenv tenv proc-names proc-types)))
+               (let ((proc-body-types
+                      (map (lambda (proc-body bound-vars bound-vars-types)
+                             (type-of proc-body
+                                (foldr2 extend-tenv tenv-for-letrec-body bound-vars bound-vars-types)))
+                           proc-bodies bound-vars-lists bound-vars-type-lists)))
+                 (for-each (lambda (proc-body-type proc-result-type proc-body)
                              (check-equal-type! proc-body-type proc-result-type proc-body))
-                           proc-body-types proc-result-types proc-bodies)
-                          (type-of letrec-body tenv-for-letrec-body)))))
+                            proc-body-types proc-result-types proc-bodies)
+                 (type-of letrec-body tenv-for-letrec-body)))))
         )))
   
   ;; Helper procedures - I LOVE FOLDR
