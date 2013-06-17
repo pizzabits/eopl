@@ -6,8 +6,24 @@ This leads to
 	ExpVal = Int + Bool + Proc + ArrVal
 	DenVal = Ref(ExpVal)
 
-Since the locations in an array are consecutive, use a representation
-like the second representation of Mutable Pairs.
+Since the locations in an array are consecutive, use a representation like the second
+representation of Mutable Pairs. What should be the result of the following program?
+
+let a = newarray(2,-99)
+    p = proc (x)
+	 let v = arrayref(x,1)
+	 in arrayset(x,1,-(v,-1))
+in begin arrayset(a,1,0); (p a); (p a); arrayref(a,1) end
+
+Here newarray(2,-99) is intended to build an array of size 2, with each location
+in the array containing -99. begin expressions are defined in exercise 4.4. Make the
+array indices zero-based, so an array of size 2 has indices 0 and 1.
+
+Answer: each time proc p is called on an array, it adds 1 to the location 1 in it.
+	the value in location 1 of array a is set to 0,
+	then p is called twice, so arrayref(a,1) returns 2.
+
+
 
 Running examples:
 
