@@ -116,13 +116,8 @@
         (var-exp (var) (deref (apply-env env var)))
 
         ;\commentbox{\diffspec}
-        (diff-exp (exp1 exp2)
-          (let ((val1 (value-of-exp exp1 env))
-                (val2 (value-of-exp exp2 env)))
-            (let ((num1 (expval->num val1))
-                  (num2 (expval->num val2)))
-              (num-val
-                (- num1 num2)))))
+        (diff-exp (e1 e2)
+          (apply-two-operands-function e1 e2 - env))
         
         (add-exp (e1 e2)
           (apply-two-operands-function e1 e2 + env))
