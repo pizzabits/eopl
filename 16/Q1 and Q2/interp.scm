@@ -71,6 +71,9 @@
                     (value-of letrec-body
                               (extend-env-rec p-name b-var p-body env)))
         
+        (assign-exp (var-type var exp)  ;; set int x = -(5,4);
+           (eopl:error "just checking, not running"))
+        
 	    )))
 
   ;; apply-procedure : Proc * ExpVal -> ExpVal

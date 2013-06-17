@@ -113,6 +113,12 @@
                              (check-equal-type! proc-body-type proc-result-type proc-body))
                             proc-body-types proc-result-types proc-bodies)
                  (type-of letrec-body tenv-for-letrec-body)))))
+        
+        (assign-exp (var-type var exp)  ;; set int x = -(5,4);
+           (let ((ext-tenv (extend-tenv var var-type tenv)))
+             (let ((exp-type (type-of exp ext-tenv)))
+               (check-equal-type! var-type exp-type exp)
+               exp-type)))
         )))
   
   ;; Helper procedures - I LOVE FOLDR

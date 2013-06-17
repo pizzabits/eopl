@@ -33,7 +33,9 @@
        ("if" expression "then" expression "else" expression)
        if-exp)
 
-      (expression (identifier) var-exp)
+      (expression 
+       (identifier)
+       var-exp)
 
       (expression
        ("let" (arbno identifier "=" expression) "in" expression)
@@ -52,6 +54,10 @@
           (arbno type identifier "(" (separated-list identifier ":" type ",") ")" "=" expression)
            "in" expression)
         letrec-exp)
+      
+      (expression  
+       ("set" type identifier "=" expression ";")  ;; set int x = -(5,4);
+       assign-exp)
 
       (type
        ("int")
@@ -63,7 +69,6 @@
       
       (type
        ("(" (separated-list type "*") "->" type ")")  ;; (t1 * t2 * ... * tn -> t)
-       ;;("(" (arbno type "->" type) ")")
        proc-type)
       
       ))

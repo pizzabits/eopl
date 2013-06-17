@@ -123,6 +123,18 @@ in let times4 = (fix t4m)
                      -(y, 30)
         in (f1 (f2 1) 2 3)" int)
       
+      ;; Exercise 7.6 CHECKS
+      (assignment-check
+       "set int x = -(5,4);" int)
+      
+      (assignment-check2 
+       "let 
+            f1 = proc(x : int, y : int, z: int)                     
+                     -(x, z)
+            f2 = proc (y : int)
+                     -(y, 30)
+          in set bool b = zero?((f1 (f2 1) 2 3));" bool)
+      
       ;; simple arithmetic
       (positive-const "11" int)
       (negative-const "-33" int)
