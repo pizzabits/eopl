@@ -11,7 +11,7 @@
         in begin
               set fib = proc (n)
                          if zero?(n)
-                         then 1
+                         then 0
                          else if zero?(-(n, 1))
                               then 1
                               else -((fib -(n, 1)) , -(0, (fib -(n, 2))));
@@ -22,23 +22,23 @@
         in begin
               set fib = proc (n)
                          if zero?(n)
-                         then 1
+                         then 0
                          else if zero?(-(n, 1))
                               then 1
                               else -((fib -(n, 1)) , -(0, (fib -(n, 2))));
               (fib 6)
-           end" 13)
+           end" 8)
       
       (fibonacci10 "let fib = 0
         in begin
               set fib = proc (n)
                          if zero?(n)
-                         then 1
+                         then 0
                          else if zero?(-(n, 1))
                               then 1
                               else -((fib -(n, 1)) , -(0, (fib -(n, 2))));
-              (fib 10)
-           end" 89)
+              (fib 14)
+           end" 377)
       
       ;; simple arithmetic
       (positive-const "11" 11)

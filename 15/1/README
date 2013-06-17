@@ -10,8 +10,8 @@ should return an expressed value that represents the list (4 3 1).
 
 a. Write an algebric definition for the list operation, similar to the definitions in pages 107-108.
 
-(value-of list(exp1, exp2, ..., expn) p q) 
- = ( (val1, q1), (val2, q2), ..., (valn, qn) )
+(value-of list(exp1, exp2, ..., expn) p σ0) 
+ = ( (val1, σ1), (val2, σ2), ..., (valn, σn) )
 
 b. Extend the language accordingly.
 
