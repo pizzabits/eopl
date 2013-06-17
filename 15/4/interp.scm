@@ -9,7 +9,7 @@
   (require "environments.scm")
   (require "store.scm")
   
-  (provide value-of-program value-of-sta instrument-let instrument-newref)
+  (provide value-of-program value-of-statement instrument-let instrument-newref)
 
 ;;;;;;;;;;;;;;;; switches for instrument-let ;;;;;;;;;;;;;;;;
 
@@ -26,80 +26,82 @@
       (initialize-store!)
       (cases program pgm
         (a-program (statement)
-          (value-of-sta statement (init-env))))))
+          (value-of-statement statement (init-env))))))
 
   ;; value-of : Sta * Env -> ExpVal
   ;; Page: 122, 123
-  (define value-of-sta
+  (define value-of-statement
     (lambda (sta env)
       (cases statement sta
 
         (assign-statement (var exp)
-                          (begin
-                            (setref!
-                               (apply-env env var)
-                               (value-of-exp exp env))))
+          (begin
+            (setref!
+              (apply-env env var)
+              (value-of-exp exp env))))
         
         (print-statement (exp)
-                         (eopl:printf "~a\n" (expval->num (value-of-exp exp env))))
+          (eopl:printf "~a\n" (expval->num (value-of-exp exp env))))
         
         (block-statement (statements)
-                         (if (pair? statements)
-                             (execute-anything-within-block-of statements env)
-                             (eopl:printf "Darn!")))
+          (for-each 
+            (lambda (statement)
+              (value-of-statement statement env))
+            statements))
         
         (if-statement (exp sta1 sta2)
-                      (let ((result (expval->bool (value-of-exp exp env))))
-                        (if (instrument-let)
-                            (eopl:printf "expression '~a' result: '~a'\n" exp result))
-                        (if result
-                            (value-of-sta sta1 env)
-                            (value-of-sta sta2 env))))
+          (let ((result (expval->bool (value-of-exp exp env))))
+            (if (instrument-let)
+                (eopl:printf "expression '~a' result: '~a'\n" exp result))
+            (if result
+              (value-of-statement sta1 env)
+              (value-of-statement sta2 env))))
         
         (while-statement (exp sta)
-                         (while-statement-helper exp sta env))
+          (while-statement-helper exp sta env))
         
         (var-statement (vars body-statement)
-                       (if (pair? vars)
-                           (var-statement-helper vars body-statement env)
-                           (eopl:error "Define at least one var!")))
-        )
-      ))
+          (value-of-statement
+           body-statement
+           (foldr
+            (lambda (var env)
+              (extend-env var (newref (num-val 888)) env))
+            env vars)))        
+        )))
   
   (define while-statement-helper
     (lambda (exp sta env)
       (let ((result (value-of-exp exp env)))
         (if (instrument-let)
-            (eopl:printf "expression '~a' result: '~a'\n" exp result))
+          (eopl:printf "expression '~a' result: '~a'\n" exp result))
         (if result
-            (begin
-              (value-of-sta sta env)
-              (while-statement-helper exp sta env)))
-        )
-      )
-    )
-
-  (define execute-anything-within-block-of
-    (lambda (statements env)
-      (if (pair? statements)
           (begin
-             (value-of-sta (car statements) env)
-             (execute-anything-within-block-of (cdr statements) env))
-          )
-      )
-    )
+            (value-of-statement sta env)
+            (while-statement-helper exp sta env)))
+        )))
   
-  (define var-statement-helper
-    (lambda (vars body-statement env)
-      (if (pair? vars)
-          (var-statement-helper
-             (cdr vars)
-             body-statement
-             (extend-env (car vars) (newref (num-val 888)) env))
-          (value-of-sta body-statement env))
-      )
-    )
-      
+  ;; Helper procedures - I LOVE FOLDR
+  (define foldr
+    (lambda (func accumulated lst)
+      (if (null? lst)
+        accumulated
+        (func (car lst) (foldr func accumulated (cdr lst))))))
+  
+  (define foldr2
+    (lambda (func accumulated lst1 lst2)
+      (if (or (null? lst1) (null? lst2))
+        accumulated
+        (func (car lst1) (car lst2) (foldr2 func accumulated (cdr lst1) (cdr lst2))))))
+  
+  (define apply-two-operands-function
+    (lambda (rand1 rand2 f env)
+      (let ((v1 (value-of-exp rand1 env))
+            (v2 (value-of-exp rand2 env)))
+        (let ((num1 (expval->num v1))
+              (num2 (expval->num v2)))
+          (num-val
+           (f num1 num2))))))
+    
   ;; value-of : Exp * Env -> ExpVal
   ;; Page: 113
   (define value-of-exp
@@ -122,21 +124,19 @@
               (num-val
                 (- num1 num2)))))
         
-        (add-exp (exp1 exp2)
-                 (let ((val1 (value-of-exp exp1 env))
-                       (val2 (value-of-exp exp2 env)))
-                   (let ((num1 (expval->num val1))
-                         (num2 (expval->num val2)))
-                     (num-val
-                      (+ num1 num2)))))
-
+        (add-exp (e1 e2)
+          (apply-two-operands-function e1 e2 + env))
+        
+        (multiply-exp (e1 e2)
+          (apply-two-operands-function e1 e2 * env))
+        
         (not-exp (exp)
-                 (let ((result (expval->bool (value-of-exp exp env))))
-                   (if (instrument-let)
-                       (eopl:printf "expression '~a' result: '~a'\n" exp result))
-                   (if result
-                       #f
-                       #t)))
+          (let ((result (expval->bool (value-of-exp exp env))))
+            (if (instrument-let)
+              (eopl:printf "expression '~a' result: '~a'\n" exp result))
+            (if result
+               #f
+               #t)))
         
         ;\commentbox{\zerotestspec}
         (zero?-exp (exp1)
@@ -159,13 +159,13 @@
             (value-of-exp body
               (extend-env var (newref v1) env))))
         
-        (proc-exp (var body)
-          (proc-val (procedure var body env)))
+        (proc-exp (vars body)
+          (proc-val (procedure vars body env)))
 
-        (call-exp (rator rand)
+        (call-exp (rator rands)
           (let ((proc (expval->proc (value-of-exp rator env)))
-                (arg (value-of-exp rand env)))
-            (apply-procedure proc arg)))
+                (arguments (map (lambda (rand) (value-of-exp rand env)) rands)))
+            (apply-procedure proc arguments)))
 
         (letrec-exp (p-names b-vars p-bodies letrec-body)
           (value-of-exp letrec-body
@@ -205,21 +205,21 @@
   
   ;; instrumented version
   (define apply-procedure
-    (lambda (proc1 arg)
+    (lambda (proc1 arguments)
       (cases proc proc1
-        (procedure (var body saved-env)
-          (let ((r (newref arg)))
-            (let ((new-env (extend-env var r saved-env)))
+        (procedure (vars body saved-env)
+          (let ((locations_of_args (map newref arguments)))
+            (let ((new-env (foldr2 extend-env saved-env vars locations_of_args)))
               (if (instrument-let)
                 (begin
                   (eopl:printf
                     "entering body of proc ~s with env =~%"
-                    var)
+                    vars)
                   (pretty-print (env->list new-env)) 
                   (eopl:printf "store =~%")
                   (pretty-print (store->readable (get-store-as-list)))
                   (eopl:printf "~%")))
-              (value-of-exp body new-env)))))))  
+              (value-of-exp body new-env)))))))
 
   ;; store->readable : Listof(List(Ref,Expval)) 
   ;;                    -> Listof(List(Ref,Something-Readable))
